@@ -10,10 +10,10 @@ import (
 )
 
 type PaperModel interface {
-	FetchPapers() ([]*Paper, error)
-	AddPaper(r *http.Request) (sql.Result, error)
-	UpdatePaperStatus(r *http.Request) (sql.Result, error)
-	DeletePaper(r *http.Request) (sql.Result, error)
+    FetchPaper(r *http.Request) (*Paper, error)
+    AnalyzeCitations(r *http.Request) ([]Citation, error)
+    ExpandGraph(r *http.Request) (*Graph, error)
+    DeletePaper(r *http.Request) (sql.Result, error)
 }
 
 type paperModel struct {
@@ -24,6 +24,14 @@ type Paper struct {
 	Title   string `json:"title"`
 	Authors string `json:"authors"`
 	Status  string `json:"status"`
+}
+
+type Citation struct {
+    // Define the fields for a citation
+}
+
+type Graph struct {
+    // Define the fields for a graph
 }
 
 func CreatePaperModel() PaperModel {

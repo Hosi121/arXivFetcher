@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"papers/model" // モデル層を論文処理用に変更
+	"crud/model" // モデル層を論文処理用に変更
 	"encoding/json"
 	"fmt"
 	"net/http"
