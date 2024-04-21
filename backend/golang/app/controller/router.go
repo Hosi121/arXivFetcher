@@ -1,67 +1,50 @@
 package controller
 
 import (
-	"net/http"
-	"os"
+    "net/http"
+    "os"
 )
 
 type Router interface {
-	FetchTodos(w http.ResponseWriter, r *http.Request)
-	AddTodo(w http.ResponseWriter, r *http.Request)
-	DeleteTodo(w http.ResponseWriter, r *http.Request)
-	ChangeTodo(w http.ResponseWriter, r *http.Request)
+    FetchPaper(w http.ResponseWriter, r *http.Request)
+    AnalyzeCitations(w http.ResponseWriter, r *http.Request)
+    ExpandGraph(w http.ResponseWriter, r *http.Request)
 }
 
 type router struct {
-	tc TodoController
+    pc PaperController
 }
 
-func CreateRouter(tc TodoController) Router {
-	return &router{tc}
+func CreateRouter(pc PaperController) Router {
+    return &router{pc}
 }
 
-func (ro *router) FetchTodos(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("ORIGIN"))
-	w.Header().Set("Content-Type", "application/json")
-	ro.tc.FetchTodos(w, r)
+func setCommonHeaders(w http.ResponseWriter) {
+    w.Header().Set("Access-Control-Allow-Headers", "*")
+    w.Header().Set("Access-Control-Allow-Origin", os.Getenv("ORIGIN"))
+    w.Header().Set("Content-Type", "application/json")
 }
 
-func (ro *router) AddTodo(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("ORIGIN"))
-	w.Header().Set("Content-Type", "application/json")
-
-	// preflightでAPIが二度実行されてしまうことを防ぐ。
-	if r.Method == "OPTIONS" {
-		return
-	}
-
-	ro.tc.AddTodo(w, r)
+func (ro *router) FetchPaper(w http.ResponseWriter, r *http.Request) {
+    if r.Method == "OPTIONS" {
+        return
+    }
+    setCommonHeaders(w)
+    ro.pc.FetchPaper(w, r)
 }
 
-func (ro *router) DeleteTodo(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("ORIGIN"))
-	w.Header().Set("Content-Type", "application/json")
-
-	// preflightでAPIが二度実行されてしまうことを防ぐ。
-	if r.Method == "OPTIONS" {
-		return
-	}
-	
-	ro.tc.DeleteTodo(w, r)
+func (ro *router) AnalyzeCitations(w http.ResponseWriter, r *http.Request) {
+    if r.Method == "OPTIONS" {
+        return
+    }
+    setCommonHeaders(w)
+    ro.pc.AnalyzeCitations(w, r)
 }
 
-func (ro *router) ChangeTodo(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Origin", os.Getenv("ORIGIN"))
-	w.Header().Set("Content-Type", "application/json")
-
-	// preflightでAPIが二度実行されてしまうことを防ぐ。
-	if r.Method == "OPTIONS" {
-		return
-	}
-	
-	ro.tc.ChangeTodo(w, r)
+func (ro *router) ExpandGraph(w http.ResponseWriter, r *http.Request) {
+    if r.Method == "OPTIONS" {
+        return
+    }
+    setCommonHeaders(w)
+    ro.pc.ExpandGraph(w, r)
 }
