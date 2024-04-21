@@ -16,9 +16,6 @@ type PaperModel interface {
     DeletePaper(r *http.Request) (sql.Result, error)
 }
 
-type paperModel struct {
-}
-
 type Paper struct {
 	Id      string `json:"id"`
 	Title   string `json:"title"`
@@ -27,11 +24,11 @@ type Paper struct {
 }
 
 type Citation struct {
-    // Define the fields for a citation
+    // ここに引用情報のフィールドを定義
 }
 
 type Graph struct {
-    // Define the fields for a graph
+    // ここにグラフ構造のフィールドを定義
 }
 
 func CreatePaperModel() PaperModel {
@@ -67,6 +64,14 @@ func (pm *paperModel) FetchPapers() ([]*Paper, error) {
 	}
 
 	return papers, nil
+}
+
+func (pm *paperModel) AnalyzeCitations(r *http.Request) ([]Citation, error) {
+    return nil, nil // Todo
+}
+
+func (pm *paperModel) ExpandGraph(r *http.Request) (*Graph, error) {
+    return nil, nil // Todo
 }
 
 func (pm *paperModel) AddPaper(r *http.Request) (sql.Result, error) {
