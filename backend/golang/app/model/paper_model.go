@@ -2,6 +2,7 @@ package model
 
 import (
 	"database/sql"
+	"errors"
 	"math/rand"
 	"net/http"
 	"time"
@@ -10,10 +11,14 @@ import (
 )
 
 type PaperModel interface {
-    FetchPaper(r *http.Request) (*Paper, error)
-    AnalyzeCitations(r *http.Request) ([]Citation, error)
-    ExpandGraph(r *http.Request) (*Graph, error)
-    DeletePaper(r *http.Request) (sql.Result, error)
+	FetchPaper(r *http.Request) ([]*Paper, error)
+	AnalyzeCitations(r *http.Request) ([]Citation, error)
+	ExpandGraph(r *http.Request) (*Graph, error)
+	DeletePaper(r *http.Request) (sql.Result, error)
+}
+
+type paperModel struct {
+	Db *sql.DB
 }
 
 type Paper struct {
@@ -23,19 +28,62 @@ type Paper struct {
 	Status  string `json:"status"`
 }
 
+type Node struct {
+	ID    string
+	Value interface{}
+}
+type Edge struct {
+	Start  *Node
+	End    *Node
+	Weight float64
+}
+
 type Citation struct {
-    // ここに引用情報のフィールドを定義
+	// ここに引用情報のフィールドを定義
 }
 
 type Graph struct {
-    // ここにグラフ構造のフィールドを定義
+	Nodes map[string]*Node
+	Edges []*Edge
+	// ここにグラフ構造のフィールドを定義
 }
 
-func CreatePaperModel() PaperModel {
-	return &paperModel{}
+func NewGraph() *Graph {
+	return &Graph{
+		Nodes: make(map[string]*Node),
+		Edges: make([]*Edge, 0),
+	}
 }
 
-func (pm *paperModel) FetchPapers() ([]*Paper, error) {
+func (g *Graph) AddNode(node *Node) error {
+	if _, exists := g.Nodes[node.ID]; exists {
+		return errors.New("Node already exists with the same ID")
+	}
+	g.Nodes[node.ID] = node
+	return nil
+}
+func (g *Graph) AddEdge(startID, endID string, weight float64) error {
+	startNode, ok := g.Nodes[startID]
+	if !ok {
+		return errors.New("start node does not exist")
+	}
+	endNode, ok := g.Nodes[endID]
+	if !ok {
+		return errors.New("snd node does not exist")
+	}
+	edge := &Edge{
+		Start:  startNode,
+		End:    endNode,
+		Weight: weight,
+	}
+	g.Edges = append(g.Edges, edge)
+	return nil
+}
+func CreatePaperModel(db *sql.DB) PaperModel {
+	return &paperModel{Db: db}
+}
+
+func (pm *paperModel) FetchPaper(r *http.Request) ([]*Paper, error) {
 	sql := `SELECT id, title, authors, status FROM papers`
 
 	rows, err := Db.Query(sql)
@@ -67,11 +115,11 @@ func (pm *paperModel) FetchPapers() ([]*Paper, error) {
 }
 
 func (pm *paperModel) AnalyzeCitations(r *http.Request) ([]Citation, error) {
-    return nil, nil // Todo
+	return []Citation{}, nil // Todo
 }
 
 func (pm *paperModel) ExpandGraph(r *http.Request) (*Graph, error) {
-    return nil, nil // Todo
+	return &Graph{}, nil // Todo
 }
 
 func (pm *paperModel) AddPaper(r *http.Request) (sql.Result, error) {
