@@ -8,8 +8,6 @@ import (
 	"net/http"
 	"os"
 	"strings"
-
-	"github.com/PuerkitoBio/goquery"
 )
 
 type Entry struct {
@@ -45,17 +43,24 @@ func parseArxivData(response *http.Response) *Entry {
 }
 
 func fetchBibtex(arxivID string) string {
-	bibtexURL := fmt.Sprintf("https://arxiv.org/bibtex/%s", arxivID)
-	response, err := http.Get(bibtexURL)
-	if err != nil || response.StatusCode != 200 {
-		return "BibTeX information could not be fetched."
-	}
-	doc, err := goquery.NewDocumentFromReader(response.Body)
-	if err != nil {
-		return "Failed to parse BibTeX."
-	}
-	bibtex := doc.Find("pre").Text()
-	return bibtex
+    bibtexURL := fmt.Sprintf("https://arxiv.org/bibtex/%s", arxivID)
+    response, err := http.Get(bibtexURL)
+    if err != nil {
+        return "Failed to fetch BibTeX: " + err.Error()
+    }
+    defer response.Body.Close()
+
+    if response.StatusCode != 200 {
+        return fmt.Sprintf("Failed to fetch BibTeX, status code: %d", response.StatusCode)
+    }
+
+    // Read the entire response body as text
+    bibtexData, err := ioutil.ReadAll(response.Body)
+    if err != nil {
+        return "Failed to read response body: " + err.Error()
+    }
+
+    return string(bibtexData)
 }
 
 func printMarkdown(arxivURL string, entry *Entry, bibtex string) {
@@ -91,4 +96,3 @@ func main() {
 		fmt.Println("Failed to fetch data from arXiv API.")
 	}
 }
-
